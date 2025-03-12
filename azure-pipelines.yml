@@ -13,6 +13,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  username: 'ananduser'
 
 steps:
 - task: NuGetToolInstaller@1
@@ -21,21 +22,22 @@ steps:
   inputs:
     restoreSolution: '$(solution)'
 
-
-
 - task: DotNetCoreCLI@2
+  displayName: Build
   inputs:
-    azureSubscription: 'demoaz'
-    command: 'build'
+    command: build
     projects: '**/*.csproj'
-    arguments: '--configuration $(buildConfiguration)'
-
+    arguments: '--configuration $(buildConfiguration)' # Update this to match your needs
 - task: DotNetCoreCLI@2
   inputs:
-    azureSubscription: 'demoaz'
-    command: 'publish'
-    publishWebProjects: true
+    command: publish
+    publishWebProjects: True
     arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-    zipAfterPublish: true
-
-
+    zipAfterPublish: True
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'demoaz'
+    appType: 'webApp'
+    WebAppName: 'demowebapp1203'
+    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
